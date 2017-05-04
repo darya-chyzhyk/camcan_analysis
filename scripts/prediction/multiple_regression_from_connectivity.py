@@ -10,7 +10,7 @@ import os
 import pandas as pd
 from collections import OrderedDict
 import numpy as np
-from camcan.datasets import load_camcan_connectivity_rest, load_camcan_behavioural
+from camcan.datasets import load_camcan_connectivity_rest
 
 from sklearn.metrics import mean_squared_error, mean_absolute_error, \
     explained_variance_score, r2_score
@@ -80,7 +80,6 @@ def camcan_prediction_uni_out(x, y, regr_uni_list, results_path,
         evs_list.append(np.mean(evs_list_cv))
         r2s_list.append(np.mean(r2s_list_cv))
 
-
     df_prediction_uni = pd.DataFrame(
         OrderedDict((('Model', pd.Series(name_regr_list)),
                      ('MSE', pd.Series(mse_list)),
@@ -89,7 +88,8 @@ def camcan_prediction_uni_out(x, y, regr_uni_list, results_path,
                      ('R2S', pd.Series(r2s_list)))))
 
     df_prediction_uni.to_csv(os.path.join(results_path, name_csv_prediction))
-    print('The result csv file %s' % os.path.join(results_path, name_csv_prediction))
+    print('The result csv file %s' % os.path.join(results_path,
+                                                  name_csv_prediction))
     return df_prediction_uni, y_test_array, y_predict_array
 
 def plot_regression(y_target, y_predict, fig_name, fig_path):
@@ -104,8 +104,7 @@ def plot_regression(y_target, y_predict, fig_name, fig_path):
     plt.savefig(os.path.join(fig_path, fig_name))
     plt.close()
 
-
-###########################################################################
+###############################################################################
 # CamCan data
 
 myhost = os.uname()[1]
@@ -130,7 +129,8 @@ kind_connectivity = ['tangent', 'correlation', 'partial correlation']
 # phenotype
 csv_name = 'participant_data.csv'
 csv_file = os.path.join(csv_path, csv_name)
-csv_behav = os.path.join(csv_path,'_Summary/csv','AllExpts_AllButOneRaw_DataTable.csv')
+csv_behav = os.path.join(csv_path,'_Summary/csv',
+                         'AllExpts_AllButOneRaw_DataTable.csv')
 dataname = 'CamCan'
 
 ###############################################################################
@@ -144,7 +144,6 @@ cv = KFold(n_splits=n_iter, random_state=0, shuffle=True)
 
 list_models = []
 # Create regression object
-
 
 regr_multi_list = [linear_model.LinearRegression(),
                    linear_model.RidgeCV(),
@@ -178,18 +177,16 @@ y_keys_save_name = 'age'
 for atlas in atlases:
     for kind_con in kind_connectivity:
 
-        conn_files = load_camcan_connectivity_rest(data_dir=os.path.join(raw_path, connectivity_folder),
-                                  patients_info_csv=csv_file,
-                                  atlas=atlas,
-                                  kind=kind_con,
-                                  patients_excluded=None)
+        conn_files = load_camcan_connectivity_rest(data_dir=os.path.join(
+            raw_path, connectivity_folder), patients_info_csv=csv_file,
+            atlas=atlas, kind=kind_con, patients_excluded=None)
 
         x = np.array(conn_files.connectivity)
         y = np.array(conn_files.scores.age)
         for n_subjects in n_subj_list:
             name_csv_prediction = (dataname + '_' + y_keys_save_name +
                                    '_prediction_' + str(n_subjects) + 'subj_' +
-                                   atlas + '_atlas_' + kind_con  + '.csv')
+                                   atlas + '_atlas_' + kind_con + '.csv')
 
             df_prediction, y_test_array, y_predict_array = \
                 camcan_prediction_uni_out(x[0:n_subjects,:], y[0:n_subjects],
@@ -202,7 +199,7 @@ for atlas in atlases:
 
             name_fig = (dataname + '_' + y_keys_save_name + '_prediction_' +
                         str(n_subjects) + 'subj_' + atlas + '_atlas_' +
-                        kind_con  + '.png')
+                        kind_con + '.png')
 
             plot_regression(y_test_array_plot, y_predict_array_plot, name_fig,
                             results_path)
@@ -210,9 +207,7 @@ for atlas in atlases:
 ###############################################################################
 # Prediction behavioural data
 
-
 n_subj_list = [626]
-
 
 y_keys = ['behavioural']
 y_keys_save_name = 'behavioural'
