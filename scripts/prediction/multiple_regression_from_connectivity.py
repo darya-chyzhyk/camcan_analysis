@@ -14,7 +14,6 @@ from sklearn.metrics import (mean_squared_error, mean_absolute_error,
                              explained_variance_score, r2_score)
 from sklearn import linear_model, svm, tree, ensemble, neighbors
 from sklearn.svm import SVR
-from sklearn.multioutput import MultiOutputRegressor
 import matplotlib.pyplot as plt
 from sklearn.model_selection import KFold
 from sklearn.preprocessing import Imputer
@@ -209,7 +208,7 @@ def camcan_prediction_multi_out(x, y, regr_multi_list, regr_uni_list,
                                                   name_csv_prediction))
     return df_prediction, y_test_array, y_predict_array
 
-
+  
 def plot_regression(y_target, y_predict, fig_name, fig_path):
     plt.scatter(y_target, y_predict)
     fig, ax = plt.subplots()
