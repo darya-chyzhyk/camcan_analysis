@@ -190,35 +190,6 @@ def _load_camcan_scores(filename_csv, subjects_selected):
     return Bunch(**patients_info.to_dict('list'))
 
 
-def _load_camcan_behavioural_features(path_json):
-    """Load the features from the Cam-CAN behavioural data set.
-
-    Parameters
-    ----------
-    path_json : str,
-        Path to the json file containing the features information.
-
-    Returns
-    -------
-    data : dict
-
-    """
-
-    if not isfile(path_json):
-        raise ValueError('The file {} does not exist.'.format(path_json))
-
-    if not path_json.endswith('.json'):
-        raise ValueError('The file {} is not a JSON file.'.format(path_json))
-
-    with open(path_json, 'r') as filename:
-        exp_features_map = json.load(filename)
-
-    for key in exp_features_map:
-        exp_features_map[key] = tuple(exp_features_map[key])
-
-    return exp_features_map
-
-
 def load_camcan_rest(data_dir=CAMCAN_DRAGO_STORE,
                      patients_info_csv=None,
                      patients_excluded=None):
@@ -447,8 +418,7 @@ def _abs_listdir(dir_name):
 def load_camcan_contrast_maps(contrast_name, statistic_type='z_score',
                               data_dir=CAMCAN_DRAGO_STORE_CONTRASTS,
                               patients_excluded=None, mask_file=None):
-    """
-    Load contrast maps for Camcan.
+    """Load contrast maps for Cam-CAN dataset.
 
     Parameters
     ----------
@@ -467,6 +437,7 @@ def load_camcan_contrast_maps(contrast_name, statistic_type='z_score',
         - If a tuple of strings, contains the ID of the patient to be
         excluded. The string provided should follow the BIDS standard (e.g.,
         'sub-******').
+
     mask_file : str or None (default=None)
         where to find the mask. if none we look for it in data_dir
 
@@ -506,7 +477,41 @@ def load_camcan_contrast_maps(contrast_name, statistic_type='z_score',
 def iterate_masked_contrast_maps(contrast_name, statistic_type='z_score',
                                  data_dir=CAMCAN_DRAGO_STORE_CONTRASTS,
                                  patients_excluded=None, mask_file=None):
+    """Load masked contrast maps for Cam-CAN data set.
 
+    Parameters
+    ----------
+    contrast_name : str,
+       Regex pattern that matches the contrasts you want
+
+    statistic_type : str, (default='z_score')
+        The kind of statistical map to load.
+
+    data_dir : str, (default=CAMCAN_DRAGO_STORE_CONTRASTS)
+        Root directory containing the root data.
+
+    patients_excluded : str, tuple of str or None, optional (default=None)
+        - If a string, corresponds to the path of a csv file. The first line
+        of this csv file should contain the name of each column.
+        - If a tuple of strings, contains the ID of the patient to be
+        excluded. The string provided should follow the BIDS standard (e.g.,
+        'sub-******').
+
+    mask_file : str or None (default=None)
+        where to find the mask. if none we look for it in data_dir
+
+    Yields
+    -------
+    contrast_data : pandas.DataFrame,
+        first columns are:
+        - 'contrast_map', the path to the map;
+        - 'contrast_name', the name of the contrast;
+        - 'mask', the path to the mask.
+        - 'subject_id', the ID of the patient;
+        subsequent columns contain the voxels
+    yields one dataframe per contrast
+
+    """
     contrast_maps = load_camcan_contrast_maps(
         contrast_name, statistic_type, data_dir,
         patients_excluded, mask_file)
@@ -535,6 +540,41 @@ def load_masked_contrast_maps(contrast_name, statistic_type='z_score',
     contrasts, maskers = zip(*iterate_masked_contrast_maps(
         contrast_name, statistic_type, data_dir,
         patients_excluded, mask_file))
+    """Load masked contrast maps for Camcan.
+
+    Parameters
+    ----------
+    contrast_name : str,
+       Regex pattern that matches the contrasts you want
+
+    statistic_type : str, (default='z_score')
+        The kind of statistical map to load.
+
+    data_dir : str, (default=CAMCAN_DRAGO_STORE_CONTRASTS)
+        Root directory containing the root data.
+
+    patients_excluded : str, tuple of str or None, optional (default=None)
+        - If a string, corresponds to the path of a csv file. The first line
+        of this csv file should contain the name of each column.
+        - If a tuple of strings, contains the ID of the patient to be
+        excluded. The string provided should follow the BIDS standard (e.g.,
+        'sub-******').
+
+    mask_file : str or None (default=None)
+        where to find the mask. if none we look for it in data_dir
+
+    Returns
+    -------
+    contrast_data : pandas.DataFrame,
+        first columns are:
+        - 'contrast_map', the path to the map;
+        - 'contrast_name', the name of the contrast;
+        - 'mask', the path to the mask.
+        - 'subject_id', the ID of the patient;
+        subsequent columns contain the voxels
+
+    """
+
     return pd.concat(contrasts), maskers[0]
 
 
@@ -612,13 +652,16 @@ def load_camcan_behavioural(filename_csv,
     return Bunch(**dataset)
 
 
-def load_camcan_behavioural_feature(name_experiment, features_map):
+def load_camcan_behavioural_feature(exp_feat_map_json, name_experiment):
     """Load the Cam-CAN cognitive behavioral data set.
 
     This loader returns a list containing the features of a requested dataset.
 
     Parameters
     ----------
+    exp_feat_map_json : str,
+        Path to the JSON file containing the mapping experiment-features.
+
     name_experiment : str,
         Name of the experiment folder containing the behavioural information.
         Choices are: "ForceMatching", "RTchoice", "Hotel", "EkmanEmHex",
@@ -626,22 +669,27 @@ def load_camcan_behavioural_feature(name_experiment, features_map):
         "PicturePriming", "CardioMeasures", "MRI", "TOT", "EmotionRegulation",
         "FamousFace", "Proverbs", "BentonFaces", "Cattell", "HomeInterview".
 
-    features_map : str,
-        path of the json file containing the features mapping.
-
-    features_map : str,
-        path of the json file containing the features mapping.
-
     Returns
     -------
-    features : tuple of str
+    features : tuple of str,
+        The features associated to the experiment requested.
 
     """
-    exp_features_map = _load_camcan_behavioural_features(features_map)
+    if not isfile(exp_feat_map_json):
+        raise ValueError('The file {} does not exist.'.format(
+            exp_feat_map_json))
+
+    if not exp_feat_map_json.endswith('.json'):
+        raise ValueError('The file {} is not a JSON file.'.format(
+            exp_feat_map_json))
+
+    with open(exp_feat_map_json, 'r') as filename:
+        exp_features_map = json.load(filename)
+
+    for key in exp_features_map:
+        exp_features_map[key] = tuple(exp_features_map[key])
 
     if name_experiment not in exp_features_map:
         raise KeyError('{} does not exist.'.format(name_experiment))
 
-    features = exp_features_map[name_experiment]
-
-    return tuple(features)
+    return tuple(exp_features_map[name_experiment])
