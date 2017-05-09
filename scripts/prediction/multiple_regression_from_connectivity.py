@@ -93,6 +93,7 @@ def camcan_prediction_uni_out(x, y, regr_uni_list, results_path,
                                                   name_csv_prediction))
     return df_prediction_uni, y_test_array, y_predict_array
 
+
 def camcan_prediction_multi_out(x, y, regr_multi_list, regr_uni_list,
                                 results_path, name_csv_prediction, y_keys):
     ''' Unioutput predictio
@@ -358,7 +359,8 @@ for atlas in atlases:
                                    atlas + '_atlas_' + kind_con + '.csv')
 
             df_prediction, y_test_array, y_predict_array = \
-                camcan_prediction_multi_out(x[0:n_subjects, :], y[0:n_subjects],
+                camcan_prediction_multi_out(x[0:n_subjects, :],
+                                            y[0:n_subjects],
                                             regr_multi_list, regr_uni_list,
                                             results_path, name_csv_prediction,
                                             y_keys)
