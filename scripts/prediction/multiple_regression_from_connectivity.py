@@ -176,7 +176,6 @@ def camcan_prediction_multi_out(x, y, regr_multi_list, regr_uni_list,
             y_test_array.append(y_test)
             y_predict_array.append(regr.predict(x_test))
 
-
         mse_list.append(np.mean(mse_list_cv))
         mae_list.append(np.mean(mae_list_cv))
         evs_list.append(np.mean(evs_list_cv))
@@ -206,8 +205,10 @@ def camcan_prediction_multi_out(x, y, regr_multi_list, regr_uni_list,
                                evs_mt_df, r2s_mt_df], axis=1)
 
     df_prediction.to_csv(os.path.join(results_path, name_csv_prediction))
-    print('The result csv file %s' % os.path.join(results_path, name_csv_prediction))
+    print('The result csv file %s' % os.path.join(results_path,
+                                                  name_csv_prediction))
     return df_prediction, y_test_array, y_predict_array
+
 
 def plot_regression(y_target, y_predict, fig_name, fig_path):
     plt.scatter(y_target, y_predict)
@@ -219,6 +220,7 @@ def plot_regression(y_target, y_predict, fig_name, fig_path):
     ax.set_ylabel('Predicted')
     plt.savefig(os.path.join(fig_path, fig_name))
     plt.close()
+
 
 ###############################################################################
 # CamCan data
@@ -246,7 +248,7 @@ kind_connectivity = ['tangent', 'correlation', 'partial correlation']
 csv_name = 'participant_data.csv'
 csv_file = os.path.join(csv_path, csv_name)
 # behaviour
-csv_behav = os.path.join(raw_path,'total_score.csv')
+csv_behav = os.path.join(raw_path, 'total_score.csv')
 
 dataname = 'CamCan'
 
@@ -283,7 +285,7 @@ regr_uni_list = [linear_model.BayesianRidge(),
 # Prediction age
 
 # select number of subject
-#n_subj_list = [100, 200, 400, 626]
+# n_subj_list = [100, 200, 400, 626]
 n_subj_list = [626]
 
 y_keys = ['age']
@@ -305,7 +307,7 @@ for atlas in atlases:
                                    atlas + '_atlas_' + kind_con + '.csv')
 
             df_prediction, y_test_array, y_predict_array = \
-                camcan_prediction_uni_out(x[0:n_subjects,:], y[0:n_subjects],
+                camcan_prediction_uni_out(x[0:n_subjects, :], y[0:n_subjects],
                                           regr_uni_list, results_path,
                                           name_csv_prediction)
 
@@ -356,7 +358,7 @@ for atlas in atlases:
                                    atlas + '_atlas_' + kind_con + '.csv')
 
             df_prediction, y_test_array, y_predict_array = \
-                camcan_prediction_multi_out(x[0:n_subjects,:], y[0:n_subjects],
+                camcan_prediction_multi_out(x[0:n_subjects, :], y[0:n_subjects],
                                             regr_multi_list, regr_uni_list,
                                             results_path, name_csv_prediction,
                                             y_keys)
@@ -371,4 +373,3 @@ for atlas in atlases:
 
             plot_regression(y_test_array_plot, y_predict_array_plot, name_fig,
                             results_path)
-
