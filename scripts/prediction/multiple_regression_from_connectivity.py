@@ -1,20 +1,17 @@
 """
 The aim of the script is age prediction of CamCan features extracted with
-diferent connectivity matrices and different atlases
-
-
+different connectivity matrices and different atlases
 """
-
 
 import os
 import pandas as pd
 from collections import OrderedDict
 import numpy as np
-from camcan.datasets import load_camcan_connectivity_rest, \
-    load_camcan_behavioural
+from camcan.datasets import (load_camcan_connectivity_rest,
+                             load_camcan_behavioural)
 
-from sklearn.metrics import mean_squared_error, mean_absolute_error, \
-    explained_variance_score, r2_score
+from sklearn.metrics import (mean_squared_error, mean_absolute_error,
+                             explained_variance_score, r2_score)
 from sklearn import linear_model, svm, tree, ensemble, neighbors
 from sklearn.svm import SVR
 from sklearn.multioutput import MultiOutputRegressor
@@ -25,15 +22,16 @@ from sklearn.preprocessing import Imputer
 
 def camcan_prediction_uni_out(x, y, regr_uni_list, results_path,
                               name_csv_prediction):
-    ''' Unioutput prediction
+    """ Uni-output prediction
 
     :param x: Training vector, array-like, shape (n_samples, n_features)
     :param y: Target vector, array-like, shape (n_samples)
     :param regr_uni_list: list of uni output regressors
     :param results_path: path to the result folder
     :param name_csv_prediction: name of the file to save
-    :return: metrics as pandas.DataFrame,
-    '''
+    :return: metrics as pandas.DataFrame
+
+    """
 
     name_regr_list = []
     mse_list = []
@@ -96,7 +94,7 @@ def camcan_prediction_uni_out(x, y, regr_uni_list, results_path,
 
 def camcan_prediction_multi_out(x, y, regr_multi_list, regr_uni_list,
                                 results_path, name_csv_prediction, y_keys):
-    ''' Unioutput predictio
+    """ Unioutput predictio
 
     :param x: Trainig vector, array-like, shape (n_samples, n_features)
     :param y: Target vector, array-like, shape (n_samples)
@@ -105,8 +103,9 @@ def camcan_prediction_multi_out(x, y, regr_multi_list, regr_uni_list,
     :param results_path: path to the result folder
     :param name_csv_prediction: name of the file to save
     :param y_keys: name of the vectors to predict, i.e "age"
-    :return: metrics as pandas.DataFrame,
-    '''
+    :return: metrics as pandas.DataFrame
+
+    """
 
     name_regr_list = []
     mse_list = []
